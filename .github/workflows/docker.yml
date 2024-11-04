@@ -14,7 +14,6 @@ on:
 env:
   DOCKER_BUILDKIT: "1"
   DOCKER_BUILD_SUMMARY: "false"
-  COSIGN_EXPERIMENTAL: "1"
 
 jobs:
   metadata:
