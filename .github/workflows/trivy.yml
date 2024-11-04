@@ -44,6 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      packages: read
       security-events: write
     steps:
       - name: Checkout repo
@@ -68,6 +69,15 @@ jobs:
             fi
           fi
           echo "image-ref=$IMAGE_REF" | tee -a "$GITHUB_OUTPUT"
+
+      # Login to GHCR to avoid rate limits.
+      # https://github.com/aquasecurity/trivy/blob/fa031898ebd2d39009e6bace47b288595793a6d7/docs/docs/configuration/db.md#rate-limits
+      - name: Login to GitHub Container Repository
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
 
       - name: Scan image
         uses: aquasecurity/trivy-action@915b19bbe73b92a6cf82a1bc12b087c9a19a5fe2 # 0.28.0
