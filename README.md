@@ -133,7 +133,7 @@ following command to verify the integrity of these images yourself.
 cosign verify \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
   --certificate-identity-regexp https://github.com/vqvu/docker-caddy-custom/.github/workflows/ \
-  vqvu/caddy-custom:latest
+  ghcr.io/vqvu/caddy-custom:latest
 ```
 
 ## License
