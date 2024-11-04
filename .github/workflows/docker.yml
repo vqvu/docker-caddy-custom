@@ -39,8 +39,8 @@ jobs:
         id: build-metadata
         shell: bash
         run: |
-          IMAGE_TITLE=caddy-custom
-          IMAGE_NAME=caddy-custom
+          IMAGE_TITLE=vqvu/caddy-custom
+          IMAGE_NAME=vqvu/caddy-custom
           CADDY_VERSION=$(grep -m 1 -Eo 'caddy:[0-9]+\.[0-9]+\.[0-9]+' Dockerfile \
             | sed -E 's/.+:([0-9]+\.[0-9]+\.[0-9]+)(.+)?$/\1/g')
           BRANCH_NAME=$(echo "${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}" \
