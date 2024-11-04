@@ -30,7 +30,7 @@ jobs:
       branch-name: ${{ steps.build-metadata.outputs.branch-name }}
       labels: ${{ steps.docker-metadata.outputs.labels }}
       tags: ${{ steps.docker-metadata.outputs.tags }}
-      platforms: linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6,linux/ppc64le,linux/s390x
+      platforms: linux/amd64
     steps:
       - name: Checkout repo
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
