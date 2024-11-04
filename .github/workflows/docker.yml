@@ -210,7 +210,7 @@ jobs:
         uses: anchore/sbom-action@1ca97d9028b51809cf6d3c934c3e160716e1b605 # v0.17.5
         with:
           format: spdx-json
-          image: ${{ needs.metadata.outputs.image-name }}@${{ steps.publish.outputs.digest }}
+          image: ghcr.io/${{ needs.metadata.outputs.image-name }}@${{ steps.publish.outputs.digest }}
           artifact-name: ${{ needs.metadata.outputs.image-title }}.spdx.json
           output-file: ${{ needs.metadata.outputs.image-title }}.spdx.json
 
