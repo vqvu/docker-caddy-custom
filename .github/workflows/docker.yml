@@ -149,6 +149,10 @@ jobs:
     name: Trivy
     needs: [build]
     uses: ./.github/workflows/trivy.yml
+    permissions:
+      contents: read
+      packages: read
+      security-events: write
     with:
       image-ref: ${{ needs.build.outputs.image-ref }}
 
