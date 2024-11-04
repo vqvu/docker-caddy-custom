@@ -1,6 +1,6 @@
 services:
   caddy:
-    image: iarekylew00t/caddy-cloudflare:latest
+    image: ghcr.io/vqvu/caddy-custom:latest
     build: . # If you want build locally using docker-compose
     restart: unless-stopped
     environment:

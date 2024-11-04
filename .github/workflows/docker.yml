@@ -39,8 +39,8 @@ jobs:
         id: build-metadata
         shell: bash
         run: |
-          IMAGE_TITLE=${GITHUB_REPOSITORY/*docker-/}
-          IMAGE_NAME=$(echo "${GITHUB_REPOSITORY/docker-/}" | tr '[:upper:]' '[:lower:]')
+          IMAGE_TITLE=caddy-custom
+          IMAGE_NAME=caddy-custom
           CADDY_VERSION=$(grep -m 1 -Eo 'caddy:[0-9]+\.[0-9]+\.[0-9]+' Dockerfile \
             | sed -E 's/.+:([0-9]+\.[0-9]+\.[0-9]+)(.+)?$/\1/g')
           BRANCH_NAME=$(echo "${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}" \
@@ -57,7 +57,6 @@ jobs:
         id: docker-metadata
         with:
           images: |
-            docker.io/${{ steps.build-metadata.outputs.image-name }}
             ghcr.io/${{ steps.build-metadata.outputs.image-name }}
           tags: |
             type=semver,pattern={{version}},value=v${{ steps.build-metadata.outputs.caddy-version }}
@@ -95,26 +94,6 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@c47758b77c9736f4b2ef4073d4d51994fabfe349 # v3.7.1
 
-      # Why?
-      # Since we're building for multiple platforms using QEMU it's takes a decent amount
-      # of time for the build to finish. We use the PR build as cache to drastically speed
-      # things ups!
-      - name: Wait for PR build cache to sync
-        if: github.event_name == 'push'
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-          WORKFLOW_NAME: PR Cache Sync
-          INTERVAL: 10
-        run: |
-          while gh run list \
-            -R "$GITHUB_REPOSITORY" \
-            -w "$WORKFLOW_NAME" \
-            --json status | jq -re 'map(select(.status != "completed")) | length > 0' >/dev/null; do
-            echo "Re-checking '$WORKFLOW_NAME' in $INTERVAL seconds..." && sleep "$INTERVAL"
-          done
-          echo "'$WORKFLOW_NAME' completed!"
-
       - name: Build CI Docker image
         uses: docker/build-push-action@4f58ea79222b3b9dc2c8bbdd6debcef730109a75 # v6.9.0
         id: build
@@ -124,24 +103,7 @@ jobs:
           tags: ttl.sh/${{ needs.metadata.outputs.image-name }}:${{ github.sha }}
           labels: ${{ needs.metadata.outputs.labels }}
           platforms: ${{ needs.metadata.outputs.platforms }}
-          cache-from: type=registry,ref=ttl.sh/${{ needs.metadata.outputs.image-name }}:${{ needs.metadata.outputs.branch-name }}
           cache-to: type=inline,mode=max
-
-      # We don't need to sign the CI build because we use the digest as the
-      # reference, which is immutable anyways. Tampering is not an issue.
-      - name: Copy CI build to branch tag
-        shell: bash
-        env:
-          IMAGE_NAME: ${{ needs.metadata.outputs.image-name }}
-          IMAGE_DIGEST: ${{ steps.build.outputs.digest }}
-          BRANCH_NAME: ${{ needs.metadata.outputs.branch-name }}
-        run: |
-          regctl image copy \
-            --verbosity info \
-            --digest-tags \
-            --force-recursive \
-            "ttl.sh/$IMAGE_NAME@$IMAGE_DIGEST" \
-            "ttl.sh/$IMAGE_NAME:$BRANCH_NAME"
 
       - name: Find existing PR comment
         if: github.event_name == 'pull_request' && cancelled() == false
@@ -216,12 +178,6 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@c47758b77c9736f4b2ef4073d4d51994fabfe349 # v3.7.1
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
-        with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
       - name: Login to GitHub Container Repository
         uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
         with:
@@ -247,7 +203,6 @@ jobs:
           IMAGE_NAME: ${{ needs.metadata.outputs.image-name }}
           IMAGE_DIGEST: ${{ steps.publish.outputs.digest }}
         run: |
-          cosign sign --yes --recursive "docker.io/$IMAGE_NAME@$IMAGE_DIGEST"
           cosign sign --yes --recursive "ghcr.io/$IMAGE_NAME@$IMAGE_DIGEST"
 
       # This will automatically attach the SBOM to the release
