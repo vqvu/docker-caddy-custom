@@ -141,24 +141,10 @@ jobs:
 
             Uh oh, something went wrong building your PR!
 
-  # We call this as a separate reusable workflow so all the event triggers
-  # are grouped together properly by their corresponding ref
-  # We need the if check because we skip the cache job sometimes
-  trivy:
-    name: Trivy
-    needs: [build]
-    uses: ./.github/workflows/trivy.yml
-    permissions:
-      contents: read
-      packages: read
-      security-events: write
-    with:
-      image-ref: ${{ needs.build.outputs.image-ref }}
-
   publish:
     name: Publish image
     if: github.ref == 'refs/heads/main'
-    needs: [metadata, build, trivy]
+    needs: [metadata, build]
     runs-on: ubuntu-latest
     permissions:
       packages: write
