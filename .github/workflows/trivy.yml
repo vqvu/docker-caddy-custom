@@ -11,10 +11,6 @@ on:
         description: Docker image ref to be scanned by Trivy
         required: false
 
-env:
-  DOCKER_BUILDKIT: "1"
-  COSIGN_EXPERIMENTAL: "1"
-
 jobs:
   trivy-fs:
     name: Scan filesystem
